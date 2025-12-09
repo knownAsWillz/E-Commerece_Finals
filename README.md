@@ -1,105 +1,59 @@
-# E-Commerce Platform (Laravel + React) plus Task Demo (Docker)
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-This repo now contains two stacks:
-- **E-Commerce app:** `backend/` (Laravel API with Sanctum auth/roles) + `frontend/` (React 18 SPA).
-- **Task demo (Dockerized):** `docker-php83/` (Laravel 12 task API) + `docker-react/` (React task UI).
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-Below documents both. Use the e-commerce stack for the main app; the docker-* stack remains as a standalone task example.
+## About Laravel
 
-## E-Commerce Backend (`backend/`)
-**Tech:** Laravel 12, PHP 8+, Sanctum tokens, MySQL  
-**Base URL:** `http://127.0.0.1:8000/api` (see `frontend/src/api/axiosClient.js`)
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-### Auth
-- `POST /register` – name, email, password -> creates customer and returns token.
-- `POST /login` – returns user + token.
-- `GET /me` – current user (auth required).
-- `POST /logout` – revoke current token.
-- Tokens issued via Sanctum; `Authorization: Bearer <token>` is added by axios interceptor.
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-### Products
-- `GET /products` – list products; supports `category` (case-insensitive, e.g., `fruit`, `fruits`) and `search` (name contains).
-- `GET /products/{id}` – product detail.
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-### Orders (auth: customer)
-- `POST /orders` – checkout with `customer_name`, `address`, `contact`, `items[]` of `{ product_id, quantity }`.  
-  - Validates stock, decrements inventory, stores line-item price snapshots, returns order with items.
+## Learning Laravel
 
-### Admin-only (role `admin`)
-- Orders: `GET /admin/orders` (all with items/user), `PUT /admin/orders/{id}/status` (pending | processing | shipped | delivered).
-- Products: `GET /admin/products`, `POST /admin/products`, `PUT /admin/products/{id}`, `DELETE /admin/products/{id}` (blocks delete if ordered).
-- Dashboard: `GET /admin/dashboard` (totals + 5 recent orders).
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
 
-### Data Model
-- `products` (`name`, `category`, `price`, `stock`, `description`, `image_url:text`, timestamps).
-- `orders` (`user_id`, `customer_name`, `address`, `contact`, `total_amount`, `status`).
-- `order_items` (`order_id`, `product_id`, `quantity`, `price` snapshot).
-- `users` includes `role` (default `customer`); admin middleware checks `role === 'admin'`.
-- Personal access tokens extended with `expires_at` column.
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-### Key Files
-- Routes: `backend/routes/api.php`
-- Controllers: `backend/app/Http/Controllers/Api/*Controller.php`
-- Middleware: `backend/app/Http/Middleware/AdminMiddleware.php`
-- Models: `backend/app/Models/{Product,Order,OrderItem,User}.php`
-- Migrations: `backend/database/migrations/*products*`, `*orders*`, `*order_items*`, `*add_role_to_users*`, `*personal_access_tokens*`
+## Laravel Sponsors
 
-### Running (typical local Laravel)
-```sh
-cd backend
-composer install
-cp .env.example .env   # set DB creds
-php artisan key:generate
-php artisan migrate
-php artisan serve       # starts on http://127.0.0.1:8000
-```
-Ensure MySQL is available and credentials match `.env`. Sanctum defaults are assumed.
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
-## E-Commerce Frontend (`frontend/`)
-**Tech:** React 18, React Router 6, Bootstrap  
-**API base:** `http://127.0.0.1:8000/api` (edit `frontend/src/api/axiosClient.js` if backend URL changes)
+### Premium Partners
 
-### Features & Routing
-- Public: `HomePage` (`/`), auth pages (`/login`, `/register`).
-- Customer-only: product browse (`/products`, `/products/:id`), cart (`/cart`), checkout (`/checkout`).
-- Admin-only: dashboard (`/admin/dashboard`), manage products (`/admin/products`), orders (`/admin/orders`).
-- Navbar reflects role; logout calls `/logout` then clears local storage.
+- **[Vehikl](https://vehikl.com)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Redberry](https://redberry.international/laravel-development)**
+- **[Active Logic](https://activelogic.com)**
 
-### State & Context
-- Auth: `AuthContext` stores `user` + token in `localStorage`; login/register flows call backend endpoints and set both.
-- Cart: `CartContext` manages cart items with qty capping by stock; exposes add/remove/update/clear and total.
+## Contributing
 
-### Key Files
-- Entry/routing: `frontend/src/App.js`, `frontend/src/index.js`
-- API client: `frontend/src/api/axiosClient.js`
-- Context: `frontend/src/context/{AuthContext,CartContext,ProtectedRoute}.js`
-- Pages: `frontend/src/pages/*.js` (shop, cart/checkout, admin dashboards)
-- UI: `frontend/src/components/Navbar.js`, `ProductCard.js`
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-### Run
-```sh
-cd frontend
-npm install
-npm start   # http://localhost:3000
-```
-Backend must be running and reachable at the base URL above.
+## Code of Conduct
 
-## Task Demo (Dockerized)
-Still available for reference/testing.
-- Backend: `docker-php83/` (Laravel 12, PHP 8.3, MySQL). API base `http://localhost:8082/api`.
-  - CRUD `/tasks` with fields: `title`, `description`, `status` (`pending|in_progress|completed`), optional `due_date`.
-  - Docker services: API `8082`, phpMyAdmin `8081`, MySQL host `3307`.
-- Frontend: `docker-react/` (React 18 SPA). Dev `3000`, prod `8080`.
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-Quick start (task demo):
-```sh
-cd docker-php83 && docker compose up -d
-# inside container: composer install && cp .env.example .env && php artisan key:generate && php artisan migrate --seed
-cd ../docker-react && docker compose up   # dev UI at http://localhost:3000
-```
+## Security Vulnerabilities
 
-## Notes & Tips
-- Update `axiosClient` base URL if backend host/port changes.
-- Admin access depends on `users.role = 'admin'`; seed or update a user accordingly.
-- Product deletion is blocked if it has order items.
-- Orders decrement stock; ensure stock is populated before checkout flows.
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+
+## License
+
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
