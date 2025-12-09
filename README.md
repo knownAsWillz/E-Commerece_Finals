@@ -1,105 +1,70 @@
-# E-Commerce Platform (Laravel + React) plus Task Demo (Docker)
+# Getting Started with Create React App
 
-This repo now contains two stacks:
-- **E-Commerce app:** `backend/` (Laravel API with Sanctum auth/roles) + `frontend/` (React 18 SPA).
-- **Task demo (Dockerized):** `docker-php83/` (Laravel 12 task API) + `docker-react/` (React task UI).
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-Below documents both. Use the e-commerce stack for the main app; the docker-* stack remains as a standalone task example.
+## Available Scripts
 
-## E-Commerce Backend (`backend/`)
-**Tech:** Laravel 12, PHP 8+, Sanctum tokens, MySQL  
-**Base URL:** `http://127.0.0.1:8000/api` (see `frontend/src/api/axiosClient.js`)
+In the project directory, you can run:
 
-### Auth
-- `POST /register` – name, email, password -> creates customer and returns token.
-- `POST /login` – returns user + token.
-- `GET /me` – current user (auth required).
-- `POST /logout` – revoke current token.
-- Tokens issued via Sanctum; `Authorization: Bearer <token>` is added by axios interceptor.
+### `npm start`
 
-### Products
-- `GET /products` – list products; supports `category` (case-insensitive, e.g., `fruit`, `fruits`) and `search` (name contains).
-- `GET /products/{id}` – product detail.
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-### Orders (auth: customer)
-- `POST /orders` – checkout with `customer_name`, `address`, `contact`, `items[]` of `{ product_id, quantity }`.  
-  - Validates stock, decrements inventory, stores line-item price snapshots, returns order with items.
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-### Admin-only (role `admin`)
-- Orders: `GET /admin/orders` (all with items/user), `PUT /admin/orders/{id}/status` (pending | processing | shipped | delivered).
-- Products: `GET /admin/products`, `POST /admin/products`, `PUT /admin/products/{id}`, `DELETE /admin/products/{id}` (blocks delete if ordered).
-- Dashboard: `GET /admin/dashboard` (totals + 5 recent orders).
+### `npm test`
 
-### Data Model
-- `products` (`name`, `category`, `price`, `stock`, `description`, `image_url:text`, timestamps).
-- `orders` (`user_id`, `customer_name`, `address`, `contact`, `total_amount`, `status`).
-- `order_items` (`order_id`, `product_id`, `quantity`, `price` snapshot).
-- `users` includes `role` (default `customer`); admin middleware checks `role === 'admin'`.
-- Personal access tokens extended with `expires_at` column.
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### Key Files
-- Routes: `backend/routes/api.php`
-- Controllers: `backend/app/Http/Controllers/Api/*Controller.php`
-- Middleware: `backend/app/Http/Middleware/AdminMiddleware.php`
-- Models: `backend/app/Models/{Product,Order,OrderItem,User}.php`
-- Migrations: `backend/database/migrations/*products*`, `*orders*`, `*order_items*`, `*add_role_to_users*`, `*personal_access_tokens*`
+### `npm run build`
 
-### Running (typical local Laravel)
-```sh
-cd backend
-composer install
-cp .env.example .env   # set DB creds
-php artisan key:generate
-php artisan migrate
-php artisan serve       # starts on http://127.0.0.1:8000
-```
-Ensure MySQL is available and credentials match `.env`. Sanctum defaults are assumed.
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-## E-Commerce Frontend (`frontend/`)
-**Tech:** React 18, React Router 6, Bootstrap  
-**API base:** `http://127.0.0.1:8000/api` (edit `frontend/src/api/axiosClient.js` if backend URL changes)
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-### Features & Routing
-- Public: `HomePage` (`/`), auth pages (`/login`, `/register`).
-- Customer-only: product browse (`/products`, `/products/:id`), cart (`/cart`), checkout (`/checkout`).
-- Admin-only: dashboard (`/admin/dashboard`), manage products (`/admin/products`), orders (`/admin/orders`).
-- Navbar reflects role; logout calls `/logout` then clears local storage.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### State & Context
-- Auth: `AuthContext` stores `user` + token in `localStorage`; login/register flows call backend endpoints and set both.
-- Cart: `CartContext` manages cart items with qty capping by stock; exposes add/remove/update/clear and total.
+### `npm run eject`
 
-### Key Files
-- Entry/routing: `frontend/src/App.js`, `frontend/src/index.js`
-- API client: `frontend/src/api/axiosClient.js`
-- Context: `frontend/src/context/{AuthContext,CartContext,ProtectedRoute}.js`
-- Pages: `frontend/src/pages/*.js` (shop, cart/checkout, admin dashboards)
-- UI: `frontend/src/components/Navbar.js`, `ProductCard.js`
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-### Run
-```sh
-cd frontend
-npm install
-npm start   # http://localhost:3000
-```
-Backend must be running and reachable at the base URL above.
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-## Task Demo (Dockerized)
-Still available for reference/testing.
-- Backend: `docker-php83/` (Laravel 12, PHP 8.3, MySQL). API base `http://localhost:8082/api`.
-  - CRUD `/tasks` with fields: `title`, `description`, `status` (`pending|in_progress|completed`), optional `due_date`.
-  - Docker services: API `8082`, phpMyAdmin `8081`, MySQL host `3307`.
-- Frontend: `docker-react/` (React 18 SPA). Dev `3000`, prod `8080`.
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-Quick start (task demo):
-```sh
-cd docker-php83 && docker compose up -d
-# inside container: composer install && cp .env.example .env && php artisan key:generate && php artisan migrate --seed
-cd ../docker-react && docker compose up   # dev UI at http://localhost:3000
-```
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Notes & Tips
-- Update `axiosClient` base URL if backend host/port changes.
-- Admin access depends on `users.role = 'admin'`; seed or update a user accordingly.
-- Product deletion is blocked if it has order items.
-- Orders decrement stock; ensure stock is populated before checkout flows.
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
