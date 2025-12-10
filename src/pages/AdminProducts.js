@@ -163,7 +163,7 @@ export default function AdminProducts() {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Cat.</th>
+              <th>Cart.</th>
               <th>Price</th>
               <th>Stock</th>
               <th style={{ width: 140 }}>Actions</th>
